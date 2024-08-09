@@ -84,3 +84,4 @@ The philosophers are represented by child processes (fork) and the forks by a se
     • Again, philosophers should avoid to die!
     
     Input example: ./philo 5 800 200 200 [5]
+    Visualizer: https://github.com/nafuka11/philosophers-visualizer
