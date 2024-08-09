@@ -1,23 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo.h                                            :+:      :+:    :+:   */
+/*   philo_bonus.h                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mvoloshy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/06 17:21:48 by mvoloshy          #+#    #+#             */
-/*   Updated: 2024/08/06 17:21:49 by mvoloshy         ###   ########.fr       */
+/*   Created: 2024/08/09 15:06:11 by mvoloshy          #+#    #+#             */
+/*   Updated: 2024/08/09 15:06:12 by mvoloshy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PHILO_H
-# define PHILO_H
+#ifndef PHILO_BONUS_H
+# define PHILO_BONUS_H
 
 # include <unistd.h>		//read, close, write
-# include <stdio.h>			//printf
 # include <stdlib.h>		//malloc
 # include <stdbool.h>		//bool
-# include <sys/time.h>			//time
+# include <sys/time.h>		//time
 # include <stdint.h>		//MAX/MIN ranges
 # include <pthread.h>		//threads & mutex
 # include <errno.h>			//to consume mutex errors
@@ -106,16 +105,17 @@ typedef struct s_table
 	t_philo			*philos;
 }	t_table;
 
-// TABLE.C: Resources initialization and freeing resources
+// TABLE.C:  initialization and freeing resources
 int		parse_args(int argc, char **argv, t_table *t);
 int		init_table(t_table *t);
+void	init_philos(t_table *t);
 void	clean_table(t_table *t);
 
-// PHILOSOPHER.C:  Philosopher init & operations
-void	init_philos(t_table *t);
+// PHILOSOPHER.C:  Philosopher operations
 void	write_philo_state(t_philo *philo, t_philo_state state);
 void	philo_usleep(long usec, t_table *t);
 void	philo_eat(t_philo *philo);
+void	philo_think(t_philo *philo);
 
 // SIMULATION.C:  run actual simulation in multithreaded evironment
 int		run_simulation(t_table *t);

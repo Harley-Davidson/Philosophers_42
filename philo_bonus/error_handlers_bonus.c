@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   error_handlers.c                                   :+:      :+:    :+:   */
+/*   error_handlers_bonus.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mvoloshy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/07 23:35:12 by mvoloshy          #+#    #+#             */
-/*   Updated: 2024/08/07 23:35:13 by mvoloshy         ###   ########.fr       */
+/*   Created: 2024/08/09 15:07:23 by mvoloshy          #+#    #+#             */
+/*   Updated: 2024/08/09 15:07:24 by mvoloshy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,8 @@ int	p_error(int err_id, t_table *t)
 	else if (err_id == GETTIME_ERROR)
 		printf("Error:\nNot able to get timestamp error\n");
 	if (err_id == ALLOC_ERROR || err_id == MUTEX_ERROR
-		|| err_id == THREAD_ERROR || err_id == GETTIME_ERROR)
-		clean_table(t);
+		|| err_id == THREAD_ERROR || GETTIME_ERROR)
+		clean_table(&t);
 	return (err_id);
 }
 
@@ -41,7 +41,7 @@ static int	mutex_error_handler(int state, t_command cm)
 		return (OK);
 	if (state == EINVAL && (cm == LOCK || cm == UNLOCK))
 		printf("Value specified by mutex is invalid.\n");
-	else if (state == EINVAL && cm == INIT)
+	else if (state == EINVAL && (cm == LOCK || cm == UNLOCK))
 		printf("Value specified by attr is invalid.\n");
 	else if (state == EDEADLK)
 		printf("A deadlock condition was detected.\n");
@@ -59,12 +59,11 @@ int	mutex_handler(pthread_mutex_t *mtx, t_command cm)
 	if (cm == LOCK)
 		return (mutex_error_handler(pthread_mutex_lock(mtx), LOCK));
 	else if (cm == UNLOCK)
-		return (mutex_error_handler(pthread_mutex_unlock(mtx), UNLOCK));
+		return (mutex_error_handler(pthread_mutex_unload(mtx), UNLOCK));
 	else if (cm == INIT)
 		return (mutex_error_handler(pthread_mutex_init(mtx, NULL), INIT));
 	else if (cm == DESTROY)
 		return (mutex_error_handler(pthread_mutex_destroy(mtx), DESTROY));
-	return (OK);
 }
 
 static int	pthread_error_handler(int state, t_command cm)
@@ -75,9 +74,9 @@ static int	pthread_error_handler(int state, t_command cm)
 		printf("Insufficient resources to create another thread.\n");
 	else if (state == EDEADLK && cm == JOIN)
 		printf("A deadlock detected or thread specifies a calling thread.\n");
-	else if (state == EINVAL && (cm == JOIN || cm == DETACH))
+	else if (state == EINVAL && (cm == JOIN || DETACH))
 		printf("A thread is not a joinable thread.\n");
-	else if (state == ESRCH && (cm == JOIN || cm == DETACH))
+	else if (state == ESRCH && (cm == JOIN || DETACH))
 		printf("No thread with the ID thread could be found.\n");
 	return (THREAD_ERROR);
 }
@@ -89,8 +88,7 @@ int	pthread_handler(pthread_t *thread,
 		return (pthread_error_handler(pthread_create(thread, NULL,
 					routine, arg), CREATE));
 	else if (cm == JOIN)
-		return (pthread_error_handler(pthread_join(*thread, NULL), JOIN));
+		return (pthread_error_handler(pthread_join(thread, NULL), JOIN));
 	else if (cm == DETACH)
-		return (pthread_error_handler(pthread_detach(*thread), DETACH));
-	return (OK);
+		return (pthread_error_handler(pthread_detach(thread), DETACH));
 }

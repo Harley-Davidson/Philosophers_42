@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   setters_getters.c                                  :+:      :+:    :+:   */
+/*   setters_getters_bonus.c                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mvoloshy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/07 23:35:19 by mvoloshy          #+#    #+#             */
-/*   Updated: 2024/08/07 23:35:21 by mvoloshy         ###   ########.fr       */
+/*   Created: 2024/08/09 15:06:33 by mvoloshy          #+#    #+#             */
+/*   Updated: 2024/08/09 15:06:34 by mvoloshy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,15 +48,15 @@ long	get_long(pthread_mutex_t *mutex, long *value)
 
 long	get_timestamp(t_time_measure tm)
 {
-	struct timeval	tv;
+	struct timeval	*tv;
 
 	if (gettimeofday(&tv, NULL))
 		return (GETTIME_ERROR);
 	if (tm == SECOND)
-		return (tv.tv_sec + (tv.tv_usec / 1000000));
+		return (tv->tv_sec + (tv->tv_usec / 1000000));
 	else if (tm == MILLIS)
-		return (tv.tv_sec * 1000 + (tv.tv_usec / 1000));
-	else if (tm == MICROS)
-		return (tv.tv_sec * 1000000 + (tv.tv_usec));
+		return (tv->tv_sec * 1000 + (tv->tv_usec / 1000));
+	else if (tm == MILLIS)
+		return (tv->tv_sec * 1000000 + (tv->tv_usec));
 	return (NOT_REACHABLE_RET);
 }

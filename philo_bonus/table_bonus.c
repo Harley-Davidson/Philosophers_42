@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   table.c                                            :+:      :+:    :+:   */
+/*   table_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mvoloshy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/06 17:22:13 by mvoloshy          #+#    #+#             */
-/*   Updated: 2024/08/06 17:22:15 by mvoloshy         ###   ########.fr       */
+/*   Created: 2024/08/09 15:06:49 by mvoloshy          #+#    #+#             */
+/*   Updated: 2024/08/09 15:06:50 by mvoloshy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,10 @@ int	parse_args(int argc, char **argv, t_table *t)
 
 	i = 0;
 	t->meals_nbr_req = -1;
-	while (++i < argc)
+	while (++i <= argc)
 	{
-		while (ft_isspace(*(argv[i])))
-			(argv[i])++;
+		while (ft_isspace(*argv[i]))
+			argv[i]++;
 		if (is_arg_err(argv[i]) != 0 || ft_atol(argv[i]) >= INT32_MAX)
 			return (ARG_VAL_ERROR);
 		if (i == 1)
@@ -65,6 +65,28 @@ int	init_table(t_table *t)
 	return (OK);
 }
 
+void	init_philos(t_table *t)
+{
+	int	i;
+
+	i = -1;
+	while (++i < t->philo_nbr)
+	{
+		t->philos[i].meals_cnt = 0;
+		t->philos[i].is_full = false;
+		t->philos[i].table = t;
+		t->philos[i].id = i + 1;
+		t->philos[i].first_fork = &(t->forks[i]);
+		t->philos[i].second_fork = &(t->forks[(i + 1) % t->philo_nbr]);
+		if (t->philos[i].id % 2 == 0)
+		{
+			t->philos[i].first_fork = &(t->forks[(i + 1) % t->philo_nbr]);
+			t->philos[i].second_fork = &(t->forks[i]);
+		}
+		mutex_handler(&(t->philos[i].philo_mtx), INIT);
+	}
+}
+
 void	clean_table(t_table *t)
 {
 	int	i;
@@ -72,8 +94,8 @@ void	clean_table(t_table *t)
 	i = -1;
 	while (++i < t->philo_nbr)
 	{
-		// if (!t->forks[i].id)
-		// 	break ;
+		if (!t->forks[i].id)
+			break ;
 		mutex_handler(&t->forks[i].fork_mtx, DESTROY);
 	}
 	free(t->philos);

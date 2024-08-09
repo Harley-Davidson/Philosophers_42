@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   utils_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mvoloshy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/06 17:24:54 by mvoloshy          #+#    #+#             */
-/*   Updated: 2024/08/06 17:24:55 by mvoloshy         ###   ########.fr       */
+/*   Created: 2024/08/09 15:06:59 by mvoloshy          #+#    #+#             */
+/*   Updated: 2024/08/09 15:07:00 by mvoloshy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,6 @@ int	is_arg_err(char *s)
 {
 	int	i;
 
-	if (*s == '\0')
-		return (ARG_VAL_ERROR);
-	i = 0;
 	if (*s == '+')
 		s++;
 	while (s[i])
@@ -63,9 +60,8 @@ long	ft_atol(char *s)
 
 void	*ft_calloc(size_t nmemb, size_t size)
 {
-	void			*ptr;
-	size_t			total_size;
-	unsigned char	*t;
+	void	*ptr;
+	size_t	total_size;
 
 	if (nmemb && size && nmemb > (SIZE_MAX / size))
 		return (NULL);
@@ -73,12 +69,6 @@ void	*ft_calloc(size_t nmemb, size_t size)
 	ptr = malloc(total_size);
 	if (ptr == NULL)
 		return (NULL);
-	t = ptr;
-	while (total_size > 0)
-	{
-		*t = '\0';
-		t++;
-		total_size--;
-	}
+	ft_bzero(ptr, total_size);
 	return (ptr);
 }
