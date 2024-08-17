@@ -48,6 +48,8 @@ int	init_table(t_table *t)
 	t->is_philos_ready = false;
 	if (mutex_handler(&t->table_mtx, INIT) != OK)
 		return (MUTEX_ERROR);
+	if (mutex_handler(&t->write_mtx, INIT) != OK)
+		return (MUTEX_ERROR);
 	t->philos = ft_calloc(t->philo_nbr, sizeof(t_philo));
 	if (t->philos == NULL)
 		return (ALLOC_ERROR);

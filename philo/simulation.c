@@ -22,8 +22,8 @@ void	*fnc(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-//	while (!get_bool(&philo->table->table_mtx, &philo->table->is_philos_ready))
-//		;
+	while (!get_bool(&philo->table->table_mtx, &philo->table->is_philos_ready))
+		;
 	while (!is_simul_end(philo->table))
 	{
 		if (philo->is_full)
@@ -41,13 +41,13 @@ int	run_simulation(t_table *t)
 	int	i;
 
 	i = -1;
-	t->simul_start = get_timestamp(MILLIS);
 	while (++i < t->philo_nbr)
 	{
 		if (pthread_handler(&(t->philos[i].thread_id),
 				fnc, &t->philos[i], CREATE) != OK)
 			return (THREAD_ERROR);
 	}
+	t->simul_start = get_timestamp(MILLIS);
 	set_bool(&t->table_mtx, &t->is_philos_ready, true);
 	i = -1;
 	while (++i < t->philo_nbr)
