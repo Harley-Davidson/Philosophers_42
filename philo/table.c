@@ -35,7 +35,7 @@ int	parse_args(int argc, char **argv, t_table *t)
 		else if (i == 5)
 			t->meals_nbr_req = ft_atol(argv[i]);
 	}
-	if (t->meals_nbr_req == 0 || t->philo_nbr < 2)
+	if (t->philo_nbr < 1)
 		return (ARG_VAL_ERROR);
 	return (OK);
 }
@@ -74,10 +74,11 @@ void	clean_table(t_table *t)
 	i = -1;
 	while (++i < t->philo_nbr)
 	{
-		// if (!t->forks[i].id)
-		// 	break ;
 		mutex_handler(&t->forks[i].fork_mtx, DESTROY);
+		mutex_handler(&t->philos[i].philo_mtx, DESTROY);
 	}
+	mutex_handler(&t->table_mtx, DESTROY);
+	mutex_handler(&t->write_mtx, DESTROY);
 	free(t->philos);
 	free(t->forks);
 }

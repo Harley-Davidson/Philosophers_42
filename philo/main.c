@@ -17,7 +17,7 @@ int	main(int argc, char **argv)
 	t_table	t;
 	int		is_err;
 
-	if (argc < 4 && argc > 5)
+	if (argc < 5 || argc > 6)
 		return (p_error(ARG_CNT_ERROR, &t));
 	else
 	{

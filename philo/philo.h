@@ -17,7 +17,7 @@
 # include <stdio.h>			//printf
 # include <stdlib.h>		//malloc
 # include <stdbool.h>		//bool
-# include <sys/time.h>			//time
+# include <sys/time.h>		//time
 # include <stdint.h>		//MAX/MIN ranges
 # include <pthread.h>		//threads & mutex
 # include <errno.h>			//to consume mutex errors
@@ -104,6 +104,7 @@ typedef struct s_table
 	pthread_mutex_t	write_mtx;
 	t_fork			*forks;
 	t_philo			*philos;
+	pthread_t		checker;
 }	t_table;
 
 // TABLE.C: Resources initialization and freeing resources
@@ -116,11 +117,13 @@ void	init_philos(t_table *t);
 void	write_philo_state(t_philo *philo, t_philo_state state);
 void	philo_usleep(long usec, t_table *t);
 void	philo_eat(t_philo *philo);
+void	philo_think(t_philo *philo, bool is_active);
 
 // SIMULATION.C:  run actual simulation in multithreaded evironment
 int		run_simulation(t_table *t);
 bool	is_simul_end(t_table *t);
-void	*fnc(void *arg);
+void	*philo_thread(void *arg);
+void	*checker_thread(void *arg);
 
 // UTILS.C:
 int		ft_isdigit(int c);
