@@ -5,58 +5,58 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: mvoloshy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/09 15:06:33 by mvoloshy          #+#    #+#             */
-/*   Updated: 2024/08/09 15:06:34 by mvoloshy         ###   ########.fr       */
+/*   Created: 2024/08/21 15:24:28 by mvoloshy          #+#    #+#             */
+/*   Updated: 2024/08/21 15:24:29 by mvoloshy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "philo_bonus.h"
 
-void	set_bool(pthread_mutex_t *mutex, bool *dest, bool value)
+void	set_bool(sem_t *sem, bool *dest, bool value)
 {
-	mutex_handler(mutex, LOCK);
+	sem_handler(sem, WAIT);
 	*dest = value;
-	mutex_handler(mutex, UNLOCK);
+	sem_handler(sem, POST);
 }
 
-bool	get_bool(pthread_mutex_t *mutex, bool *value)
+bool	get_bool(sem_t *sem, bool *value)
 {
-	bool	res;
+	bool	result;
 
-	mutex_handler(mutex, LOCK);
-	res = *value;
-	mutex_handler(mutex, UNLOCK);
-	return (res);
+	sem_handler(sem, WAIT);
+	result = *value;
+	sem_handler(sem, POST);
+	return (result);
 }
 
-void	set_long(pthread_mutex_t *mutex, long *dest, long value)
+void	set_long(sem_t *sem, long *dest, long value)
 {
-	mutex_handler(mutex, LOCK);
+	sem_handler(sem, WAIT);
 	*dest = value;
-	mutex_handler(mutex, UNLOCK);
+	sem_handler(sem, POST);
 }
 
-long	get_long(pthread_mutex_t *mutex, long *value)
+long	get_long(sem_t *sem, long *value)
 {
-	long	res;
+	long	result;
 
-	mutex_handler(mutex, LOCK);
-	res = *value;
-	mutex_handler(mutex, UNLOCK);
-	return (res);
+	sem_handler(sem, WAIT);
+	result = *value;
+	sem_handler(sem, POST);
+	return (result);
 }
 
 long	get_timestamp(t_time_measure tm)
 {
-	struct timeval	*tv;
+	struct timeval	tv;
 
 	if (gettimeofday(&tv, NULL))
 		return (GETTIME_ERROR);
 	if (tm == SECOND)
-		return (tv->tv_sec + (tv->tv_usec / 1000000));
+		return (tv.tv_sec + (tv.tv_usec / 1000000));
 	else if (tm == MILLIS)
-		return (tv->tv_sec * 1000 + (tv->tv_usec / 1000));
-	else if (tm == MILLIS)
-		return (tv->tv_sec * 1000000 + (tv->tv_usec));
+		return (tv.tv_sec * 1000 + (tv.tv_usec / 1000));
+	else if (tm == MICROS)
+		return (tv.tv_sec * 1000000 + (tv.tv_usec));
 	return (NOT_REACHABLE_RET);
 }

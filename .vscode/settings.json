@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "philo.h": "c",
+        "philo_bonus.h": "c",
+        "signal.h": "c"
     }
 }

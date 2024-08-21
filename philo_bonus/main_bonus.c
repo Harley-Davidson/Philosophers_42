@@ -5,19 +5,19 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: mvoloshy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/09 15:05:59 by mvoloshy          #+#    #+#             */
-/*   Updated: 2024/08/09 15:06:00 by mvoloshy         ###   ########.fr       */
+/*   Created: 2024/08/21 15:24:50 by mvoloshy          #+#    #+#             */
+/*   Updated: 2024/08/21 15:24:52 by mvoloshy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "philo_bonus.h"
 
 int	main(int argc, char **argv)
 {
 	t_table	t;
 	int		is_err;
 
-	if (argc != 4 || argc != 5)
+	if (argc < 5 || argc > 6)
 		return (p_error(ARG_CNT_ERROR, &t));
 	else
 	{

@@ -5,34 +5,70 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: mvoloshy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/09 15:06:40 by mvoloshy          #+#    #+#             */
-/*   Updated: 2024/08/09 15:06:41 by mvoloshy         ###   ########.fr       */
+/*   Created: 2024/08/21 15:24:21 by mvoloshy          #+#    #+#             */
+/*   Updated: 2024/08/21 15:24:22 by mvoloshy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "philo_bonus.h"
 
 bool	is_simul_end(t_table *t)
 {
-	return (get_bool(&(t->table_mtx), t->is_simul_end));
+	return (get_bool(&(t->table_mtx), &t->is_simul_end));
 }
 
-void	*fnc(void *arg)
+bool	is_dead(t_philo *philo)
+{
+	return (get_timestamp(MILLIS) - get_long(&philo->philo_mtx,
+			&philo->meal_timestamp) > philo->table->time_to_die);
+}
+
+void	*philo_thread(void *arg)
 {
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	while (!get_bool(&philo->table->table_mtx, philo->table->is_philos_ready))
+	while (!get_bool(&philo->table->table_sem, &philo->table->is_philos_ready))
 		;
+	set_long(&philo->philo_mtx, &philo->meal_timestamp, get_timestamp(MILLIS));
+	philo_think(philo, false);
 	while (!is_simul_end(philo->table))
 	{
-		if (philo->is_full)
-			break ;
 		philo_eat(philo);
 		write_philo_state(philo, SLEEP);
 		philo_usleep(philo->table->time_to_sleep, philo->table);
-		philo_think(philo);
+		philo_think(philo, true);
 	}
+	return (NULL);
+}
+
+void	*checker_thread(void *arg)
+{
+	t_table	*t;
+	int		i;
+	int		cnt;
+
+	t = (t_table *)arg;
+	while (!get_bool(&t->table_mtx, &t->is_philos_ready))
+		;
+	while (!is_simul_end(t))
+	{
+		i = -1;
+		cnt = 0;
+		while (++i < t->philo_nbr && !is_simul_end(t))
+		{
+			if (is_dead(&t->philos[i]))
+			{
+				write_philo_state(&(t->philos[i]), DIE);
+				set_bool(&t->table_mtx, &t->is_simul_end, true);
+			}
+			if (get_bool(&t->philos[i].philo_mtx, &t->philos[i].is_full))
+				cnt++;
+			if (cnt == t->philo_nbr)
+				set_bool(&t->table_mtx, &t->is_simul_end, true);
+		}
+	}
+	return (NULL);
 }
 
 int	run_simulation(t_table *t)
@@ -43,15 +79,20 @@ int	run_simulation(t_table *t)
 	while (++i < t->philo_nbr)
 	{
 		if (pthread_handler(&(t->philos[i].thread_id),
-				fnc, &t->philos[i], CREATE) != OK)
+				philo_thread, &t->philos[i], CREATE) != OK)
 			return (THREAD_ERROR);
 	}
 	t->simul_start = get_timestamp(MILLIS);
-	set_bool(&t->table_mtx, t->is_philos_ready, true);
+	set_bool(&t->table_mtx, &t->is_philos_ready, true);
+	if (pthread_handler(&(t->checker), checker_thread, t, CREATE) != OK)
+		return (THREAD_ERROR);
 	i = -1;
 	while (++i < t->philo_nbr)
 	{
 		if (pthread_handler(&(t->philos[i].thread_id), NULL, NULL, JOIN) != OK)
 			return (THREAD_ERROR);
 	}
+	if (pthread_handler(&(t->checker), NULL, NULL, JOIN) != OK)
+		return (THREAD_ERROR);
+	return (OK);
 }

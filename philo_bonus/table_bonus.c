@@ -5,12 +5,12 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: mvoloshy <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/09 15:06:49 by mvoloshy          #+#    #+#             */
-/*   Updated: 2024/08/09 15:06:50 by mvoloshy         ###   ########.fr       */
+/*   Created: 2024/08/21 15:24:35 by mvoloshy          #+#    #+#             */
+/*   Updated: 2024/08/21 15:24:36 by mvoloshy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "philo_bonus.h"
 
 int	parse_args(int argc, char **argv, t_table *t)
 {
@@ -18,10 +18,10 @@ int	parse_args(int argc, char **argv, t_table *t)
 
 	i = 0;
 	t->meals_nbr_req = -1;
-	while (++i <= argc)
+	while (++i < argc)
 	{
-		while (ft_isspace(*argv[i]))
-			argv[i]++;
+		while (ft_isspace(*(argv[i])))
+			(argv[i])++;
 		if (is_arg_err(argv[i]) != 0 || ft_atol(argv[i]) >= INT32_MAX)
 			return (ARG_VAL_ERROR);
 		if (i == 1)
@@ -35,7 +35,7 @@ int	parse_args(int argc, char **argv, t_table *t)
 		else if (i == 5)
 			t->meals_nbr_req = ft_atol(argv[i]);
 	}
-	if (t->meals_nbr_req == 0 || t->philo_nbr < 2)
+	if (t->philo_nbr < 1)
 		return (ARG_VAL_ERROR);
 	return (OK);
 }
@@ -46,8 +46,10 @@ int	init_table(t_table *t)
 
 	t->is_simul_end = false;
 	t->is_philos_ready = false;
-	if (mutex_handler(&t->table_mtx, INIT) != OK)
-		return (MUTEX_ERROR);
+	if (sem_handler(&t->table_sem, INIT) != OK
+		|| sem_handler(&t->write_sem, INIT) != OK
+		|| sem_handler(&t->fork_count_sem, INIT) != OK)
+		return (SEMAPHORE_ERROR);
 	t->philos = ft_calloc(t->philo_nbr, sizeof(t_philo));
 	if (t->philos == NULL)
 		return (ALLOC_ERROR);
@@ -57,34 +59,12 @@ int	init_table(t_table *t)
 	i = -1;
 	while (++i < t->philo_nbr)
 	{
-		if (mutex_handler(&t->forks[i].fork_mtx, INIT) != OK)
-			return (MUTEX_ERROR);
+		if (sem_handler(&t->forks[i].fork_sem, INIT) != OK)
+			return (SEMAPHORE_ERROR);
 		t->forks[i].id = i;
 	}
 	init_philos(t);
 	return (OK);
-}
-
-void	init_philos(t_table *t)
-{
-	int	i;
-
-	i = -1;
-	while (++i < t->philo_nbr)
-	{
-		t->philos[i].meals_cnt = 0;
-		t->philos[i].is_full = false;
-		t->philos[i].table = t;
-		t->philos[i].id = i + 1;
-		t->philos[i].first_fork = &(t->forks[i]);
-		t->philos[i].second_fork = &(t->forks[(i + 1) % t->philo_nbr]);
-		if (t->philos[i].id % 2 == 0)
-		{
-			t->philos[i].first_fork = &(t->forks[(i + 1) % t->philo_nbr]);
-			t->philos[i].second_fork = &(t->forks[i]);
-		}
-		mutex_handler(&(t->philos[i].philo_mtx), INIT);
-	}
 }
 
 void	clean_table(t_table *t)
@@ -94,10 +74,11 @@ void	clean_table(t_table *t)
 	i = -1;
 	while (++i < t->philo_nbr)
 	{
-		if (!t->forks[i].id)
-			break ;
-		mutex_handler(&t->forks[i].fork_mtx, DESTROY);
+		sem_handler(&t->forks[i].fork_sem, DESTROY);
+		sem_handler(&t->philos[i].philo_sem, DESTROY);
 	}
+	sem_handler(&t->table_sem, DESTROY);
+	sem_handler(&t->write_sem, DESTROY);
 	free(t->philos);
 	free(t->forks);
 }

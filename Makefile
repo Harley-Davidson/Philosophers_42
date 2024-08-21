@@ -1,18 +1,18 @@
-SRC     =       philo/main.c           \
-				philo/table.c          \
-				philo/philosopher.c    \
-				philo/simulation.c     \
-				philo/setters_getters.c\
-				philo/error_handlers.c \
+SRC     =       philo/main.c			\
+				philo/table.c			\
+				philo/philosopher.c		\
+				philo/simulation.c		\
+				philo/setters_getters.c	\
+				philo/error_handlers.c	\
 				philo/utils.c
 
-SRC_bonus =     philo_bonus/main.c      \
-				philo_bonus/table.c    \
-				philo_bonus/philosopher.c\
-				philo_bonus/simulation.c\
-				philo_bonus/setters_getters.c\
-				philo_bonus/error_handlers.c\
-				philo_bonus/utils.c
+SRC_bonus =     philo_bonus/main_bonus.c			\
+				philo_bonus/table_bonus.c			\
+				philo_bonus/philosopher_bonus.c		\
+				philo_bonus/simulation_bonus.c		\
+				philo_bonus/setters_getters_bonus.c	\
+				philo_bonus/error_handlers_bonus.c	\
+				philo_bonus/utils_bonus.c
 
 OBJS    = $(addprefix $(BUILD_DIR)/, $(notdir $(SRC:.c=.o)))
 OBJS_bonus = $(addprefix $(BUILD_DIR)/, $(notdir $(SRC_bonus:.c=.o)))
