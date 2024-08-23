@@ -42,27 +42,19 @@ int	parse_args(int argc, char **argv, t_table *t)
 
 int	init_table(t_table *t)
 {
-	int	i;
-
-	t->is_simul_end = false;
-	t->is_philos_ready = false;
-	if (sem_handler(&t->table_sem, INIT) != OK
-		|| sem_handler(&t->write_sem, INIT) != OK
-		|| sem_handler(&t->fork_count_sem, INIT) != OK)
+	sem_unlink("/fork_sem");
+	sem_unlink("/table_sem");
+	sem_unlink("/write_sem");
+	t->fork_sem = sem_open("/fork_sem", O_CREAT, 0644, t->philo_nbr - 1);
+	t->table_sem = sem_open("/table_sem", O_CREAT, 0644, 1);
+	t->write_sem = sem_open("/write_sem", O_CREAT, 0644, 1);
+	if (t->fork_sem == SEM_FAILED || t->table_sem == SEM_FAILED
+		|| t->write_sem == SEM_FAILED)
 		return (SEMAPHORE_ERROR);
 	t->philos = ft_calloc(t->philo_nbr, sizeof(t_philo));
 	if (t->philos == NULL)
 		return (ALLOC_ERROR);
-	t->forks = ft_calloc(t->philo_nbr, sizeof(t_fork));
-	if (t->forks == NULL)
-		return (ALLOC_ERROR);
-	i = -1;
-	while (++i < t->philo_nbr)
-	{
-		if (sem_handler(&t->forks[i].fork_sem, INIT) != OK)
-			return (SEMAPHORE_ERROR);
-		t->forks[i].id = i;
-	}
+	t->is_simul_end = false;
 	init_philos(t);
 	return (OK);
 }
@@ -73,12 +65,9 @@ void	clean_table(t_table *t)
 
 	i = -1;
 	while (++i < t->philo_nbr)
-	{
-		sem_handler(&t->forks[i].fork_sem, DESTROY);
-		sem_handler(&t->philos[i].philo_sem, DESTROY);
-	}
-	sem_handler(&t->table_sem, DESTROY);
-	sem_handler(&t->write_sem, DESTROY);
+		sem_handler(&t->philos[i].philo_sem, DESTROY, 0);
+	sem_unlink("/fork_sem");
+	sem_unlink("/table_sem");
+	sem_unlink("/write_sem");
 	free(t->philos);
-	free(t->forks);
 }

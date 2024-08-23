@@ -14,35 +14,35 @@
 
 void	set_bool(sem_t *sem, bool *dest, bool value)
 {
-	sem_handler(sem, WAIT);
+	sem_handler(sem, WAIT, 0);
 	*dest = value;
-	sem_handler(sem, POST);
+	sem_handler(sem, POST, 0);
 }
 
 bool	get_bool(sem_t *sem, bool *value)
 {
 	bool	result;
 
-	sem_handler(sem, WAIT);
+	sem_handler(sem, WAIT, 0);
 	result = *value;
-	sem_handler(sem, POST);
+	sem_handler(sem, POST, 0);
 	return (result);
 }
 
 void	set_long(sem_t *sem, long *dest, long value)
 {
-	sem_handler(sem, WAIT);
+	sem_handler(sem, WAIT, 0);
 	*dest = value;
-	sem_handler(sem, POST);
+	sem_handler(sem, POST, 0);
 }
 
 long	get_long(sem_t *sem, long *value)
 {
 	long	result;
 
-	sem_handler(sem, WAIT);
+	sem_handler(sem, WAIT, 0);
 	result = *value;
-	sem_handler(sem, POST);
+	sem_handler(sem, POST, 0);
 	return (result);
 }
 

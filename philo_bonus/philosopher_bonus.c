@@ -23,14 +23,8 @@ void	init_philos(t_table *t)
 		t->philos[i].is_full = false;
 		t->philos[i].table = t;
 		t->philos[i].id = i + 1;
-		t->philos[i].first_fork = &(t->forks[i]);
-		t->philos[i].second_fork = &(t->forks[(i + 1) % t->philo_nbr]);
-		if (t->philos[i].id % 2 == 0)
-		{
-			t->philos[i].first_fork = &(t->forks[(i + 1) % t->philo_nbr]);
-			t->philos[i].second_fork = &(t->forks[i]);
-		}
-		mutex_handler(&(t->philos[i].philo_mtx), INIT);
+		sem_handler(&(t->philos[i].philo_sem), INIT, 1);
+		set_long(&t->philos[i].philo_sem, &t->philos[i].meal_timestamp, get_timestamp(MILLIS));
 	}
 }
 
@@ -39,7 +33,7 @@ void	write_philo_state(t_philo *philo, t_philo_state state)
 	long	elapsed;
 
 	elapsed = get_timestamp(MILLIS) - philo->table->simul_start;
-	mutex_handler(&(philo->table->write_mtx), LOCK);
+	sem_handler(&philo->philo_sem, WAIT, 0);
 	if (!is_simul_end(philo->table))
 	{
 		if (state == TAKE_FIRST_FORK || state == TAKE_SECOND_FORK)
@@ -53,7 +47,7 @@ void	write_philo_state(t_philo *philo, t_philo_state state)
 		else if (state == DIE)
 			printf("%lu %lu died\n", elapsed, philo->id);
 	}
-	mutex_handler(&(philo->table->write_mtx), UNLOCK);
+	sem_handler(&philo->philo_sem, POST, 0);
 }
 
 void	philo_usleep(long milisec, t_table *t)
@@ -83,23 +77,22 @@ void	philo_usleep(long milisec, t_table *t)
 
 void	philo_eat(t_philo *philo)
 {
-	mutex_handler(&(philo->first_fork->fork_mtx), LOCK);
+	sem_handler(philo->table->fork_sem, WAIT, 0);
 	write_philo_state(philo, TAKE_FIRST_FORK);
-	if (philo->table->philo_nbr == 1)
-	{
-		mutex_handler(&(philo->first_fork->fork_mtx), UNLOCK);
-		return ;
-	}
-	mutex_handler(&(philo->second_fork->fork_mtx), LOCK);
+	sem_handler(philo->table->fork_sem, WAIT, 0);
 	write_philo_state(philo, TAKE_SECOND_FORK);
 	write_philo_state(philo, EAT);
-	set_long(&philo->philo_mtx, &philo->meal_timestamp, get_timestamp(MILLIS));
+	set_long(&philo->philo_sem, &philo->meal_timestamp, get_timestamp(MILLIS));
+	// printf("PHILO %ld meal time: %ld\n", philo->id, get_long(&philo->philo_sem, &philo->meal_timestamp) - get_long(&philo->table->table_sem, &philo->table->simul_start));
 	philo->meals_cnt++;
 	philo_usleep(philo->table->time_to_eat, philo->table);
 	if (philo->meals_cnt == philo->table->meals_nbr_req)
-		set_bool(&(philo->table->table_mtx), &philo->is_full, true);
-	mutex_handler(&(philo->first_fork->fork_mtx), UNLOCK);
-	mutex_handler(&(philo->second_fork->fork_mtx), UNLOCK);
+	{
+		set_bool(philo->table->table_sem, &philo->is_full, true);
+		printf("PHILO %ld GOT FULL\n", philo->id);
+	}
+	sem_handler(philo->table->fork_sem, POST, 0);
+	sem_handler(philo->table->fork_sem, POST, 0);
 }
 
 void	philo_think(t_philo *philo, bool is_active)
